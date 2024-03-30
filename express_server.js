@@ -36,7 +36,7 @@ app.get("/hello", (req, res) => {
 // Add a new route handler for the "/urls" path and pass the url data to the urls_index template
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
-  res.render("urls_index");
+  res.render("urls_index", templateVars);
 });
 
 // Initialize server to listen on PORT for incoming HTTP requests
