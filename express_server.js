@@ -33,6 +33,12 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+// Add a new route handler for the "/urls" path and pass the url data to the urls_index template
+app.get("/urls", (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  res.render("urls_index");
+});
+
 // Initialize server to listen on PORT for incoming HTTP requests
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`)
