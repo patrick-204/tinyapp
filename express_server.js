@@ -39,6 +39,12 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+// Add a new route handler for the "/urls/:id" path and pass the url data to the urls_show template
+app.get("/urls/:id", (req, res) => {
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  res.render("urls_show", templateVars);
+});
+
 // Initialize server to listen on PORT for incoming HTTP requests
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`)
