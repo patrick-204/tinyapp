@@ -27,6 +27,8 @@
           <tr>
             <th scope="col">Short URL ID</th>
             <th scope="col">Long URL</th>
+            <!-- Add an edit column -->
+            <th scope="col">Edit</th>
             <!-- Add delete table column header -->
             <th scope="col">Delete</th>
           </tr>
@@ -36,6 +38,10 @@
             <tr>
               <td><%= id %></td>
               <td><%= urls[id] %></td>
+              <!-- Add an edit link button in the table for each URL that takes the user to the appropriate "url_show" page -->
+              <td><a href="/urls/<%= id %>">
+                <button type="submit" class="btn btn-primary">Edit</button></td>
+              </td></a>
               <!-- Set up the form in the table and set it to delete the id entered in the URL -->
               <td><form method="POST" action="/urls/<%= id %>/delete">
                 <button type="submit" class="btn btn-primary">Delete</button></td>
@@ -44,8 +50,6 @@
           <% } %>
         </tbody>
       </table>
-      <!-- Link for shortening a new URL -->
-      <a href="#">Blank link</a>
     </main>
     <!-- Bootstrap JS -->
     <script

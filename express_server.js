@@ -94,6 +94,20 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 })
 
+// Add a POST route that updates a URL resource; POST /urls/:id and have it update the 
+// value of your stored long URL based on the new value in req.body. Finally, redirect 
+// the client back to /urls
+app.post("/urls/:id", (req, res) => {
+  // Define the new long URL as the long URL received in the req.body object
+  const id = req.body.longURL;
+
+  // Replace the old long URL with the new long URL
+  urlDatabase[req.params.id] = id
+
+  // Redirect the client back to the url_index page
+  res.redirect("/urls");
+})
+
 // Initialize server to listen on PORT for incoming HTTP requests
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`)
