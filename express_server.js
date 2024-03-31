@@ -1,6 +1,9 @@
 // Import the express library
 const express = require('express');
 
+// Import the cookie-parser library
+const cookieParser = require('cookie-parser');
+
 // Define the app as an instance of express
 const app = express();
 
