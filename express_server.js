@@ -16,6 +16,9 @@ function generateRandomString() {
   return randomString;
 };
 
+// Tell Express to use the cookie-parser middleware
+app.use(cookieParser());
+
 // Set ejs as the view engine
 app.set("view engine", "ejs");
 
@@ -48,18 +51,32 @@ app.get("/hello", (req, res) => {
 
 // Add a new route handler for the "/urls" path and pass the url data to the urls_index template
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { 
+    // Pass in the username to the urls_index EJS template
+    username: req.cookies["username"],
+    urls: urlDatabase };
+
   res.render("urls_index", templateVars);
 });
 
 // Add a new route handler to render the "urls_new" ejs template
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  // Pass in the username to the urls_new EJS template
+  const templateVars = { username: req.cookies["username"] };
+
+
+  res.render("urls_new", templateVars);
 });
 
 // Add a new route handler for the "/urls/:id" path and pass the url data to the urls_show template
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const templateVars = { 
+    id: req.params.id, 
+    longURL: urlDatabase[req.params.id],
+    // Pass in the username to the urls_show EJS template
+    username: req.cookies["username"]
+   };
+
   res.render("urls_show", templateVars);
 });
 
