@@ -106,6 +106,15 @@ app.post("/urls/:id", (req, res) => {
 
   // Redirect the client back to the url_index page
   res.redirect("/urls");
+});
+
+// Add an endpoint to handle a POST to /login
+app.post("/login", (req, res) => {
+  // Set a cookie named "username" to the value corresponding to the username submitted by the user.
+  res.cookie('username', req.body.username);
+
+  // Redirect the browser to the "/urls" page
+  res.redirect("/urls");
 })
 
 // Initialize server to listen on PORT for incoming HTTP requests
