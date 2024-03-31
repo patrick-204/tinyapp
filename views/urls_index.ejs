@@ -27,6 +27,8 @@
           <tr>
             <th scope="col">Short URL ID</th>
             <th scope="col">Long URL</th>
+            <!-- Add delete table column header -->
+            <th scope="col">Delete</th>
           </tr>
         </thead>
         <tbody>
@@ -34,6 +36,10 @@
             <tr>
               <td><%= id %></td>
               <td><%= urls[id] %></td>
+              <!-- Set up the form in the table and set it to delete the id entered in the URL -->
+              <form method="POST" action="/urls/<%= id %>/delete">
+                <td><button type="submit" class="btn btn-primary">Delete</button></td>
+              </form>
             </tr>
           <% } %>
         </tbody>

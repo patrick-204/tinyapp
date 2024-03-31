@@ -80,6 +80,20 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
+// Add a POST route that removes a URL resource: POST /urls/:id/delete
+// Use Javascript's delete operator to remove the URL.
+// After the resource has been deleted, redirect the client back to the urls_index page
+app.post("/urls/:id/delete", (req, res) => {
+  // Get the ID from the request
+  const id = req.params.id;
+
+  // Delete the URL
+  delete urlDatabase[id];
+
+  // Redirect the client back to the url_index page
+  res.redirect("/urls");
+})
+
 // Initialize server to listen on PORT for incoming HTTP requests
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`)
