@@ -7,6 +7,12 @@ const app = express();
 // Define default port for server to listen on
 const PORT = 8080;
 
+// Function the generates a random 6 alphanumeric string
+function generateRandomString() {
+  const randomString = Math.random().toString(36).substring(2, 8);
+  console.log(randomString);
+};
+
 // Set ejs as the view engine
 app.set("view engine", "ejs");
 
@@ -52,6 +58,14 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
+});
+
+// Add POST route handler to receive the form submission
+app.post("/urls", (req, res) => {
+  // Log the POST request body to the console
+  console.log(req.body); 
+  // Respond with 'Ok' (we will replace this)
+  res.send("Ok"); 
 });
 
 // Initialize server to listen on PORT for incoming HTTP requests
