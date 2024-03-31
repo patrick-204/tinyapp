@@ -15,6 +15,10 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
+// Use the Express 'urlencoded' middleware to parse incoming POST requests containing urlencoded data in their body
+// so that it is accessible by the server in req.body in the form of a string
+app.use(express.urlencoded({ extended: true }));
+
 // Calls the callback function that has response "Hello" when GET request is made to 
 // root path of the server
 app.get("/", (req, res) => {
@@ -37,6 +41,11 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
+});
+
+// Add a new route handler to render the "urls_new" ejs template
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
 });
 
 // Add a new route handler for the "/urls/:id" path and pass the url data to the urls_show template
