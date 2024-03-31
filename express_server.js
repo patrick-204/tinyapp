@@ -10,7 +10,7 @@ const PORT = 8080;
 // Function the generates a random 6 alphanumeric string
 function generateRandomString() {
   const randomString = Math.random().toString(36).substring(2, 8);
-  console.log(randomString);
+  return randomString;
 };
 
 // Set ejs as the view engine
@@ -60,12 +60,24 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// Route handler for short URL requests. Redirects to appropriate long URL
+app.get("/u/:id", (req, res) => {
+
+  // Assign the longURL the value of the urlDatabase object value associated with the given ID
+  const longURL = urlDatabase[req.params.id];
+
+  // Redirect to the long URL using the short URL
+  res.redirect(longURL);
+});
+
 // Add POST route handler to receive the form submission
 app.post("/urls", (req, res) => {
-  // Log the POST request body to the console
-  console.log(req.body); 
-  // Respond with 'Ok' (we will replace this)
-  res.send("Ok"); 
+  // Save the user entered URL to the URL database object with the radomly generated ID as the key
+  let id = generateRandomString();
+  urlDatabase[id] = req.body.longURL;
+
+  // Redirect to "/urls/:id" path so the user can see the newly added URL
+  res.redirect(`/urls/${id}`);
 });
 
 // Initialize server to listen on PORT for incoming HTTP requests
