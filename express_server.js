@@ -135,7 +135,18 @@ app.post("/login", (req, res) => {
 
   // Redirect the browser to the "/urls" page
   res.redirect("/urls");
-})
+});
+
+// Add an endpoint to handle a POST to /logout
+app.post("/logout", (req, res) => {
+  // Clear the username cookie by setting it to null. Set it to happen right away or doesn't work
+  res.cookie('username', null, { expires: new Date(0) });
+
+  // console.log(res.cookie('username', undefined));
+
+  // Redirect the browser to the "/urls" page
+  res.redirect("/urls");
+});
 
 // Initialize server to listen on PORT for incoming HTTP requests
 app.listen(PORT, () => {

@@ -18,11 +18,12 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
+    <!-- If no user is logged in then display login form with login button -->
+    <% if(!username) { %>
     <!-- Add form that POSTs to "/login" with name attribute "username" -->
+    <!-- Add form that POSTs to "/logout" with name attribute "username" -->
     <form class="form-inline" action="/login" method="POST">
       <div class="form-group mb-2">
-        <!-- Add label to form to show logged in as username/cookie -->
-        <label>Logged in as: <%= username %>!</label>
         <input
           class="form-control"
           type="text"
@@ -33,5 +34,15 @@
         <button type="submit" class="btn btn-primary">Login</button>
       </div>
     </form>
+    <!-- If the user is logged in then display form that shows username and logout button -->
+    <% } else { %>
+    <form class="form-inline" action="/logout" method="POST">
+      <div class="form-group mb-2">
+        <!-- Add label to form to show logged in as username/cookie -->
+        <label>Logged in as: <%= username %>!</label>
+        <button type="submit" class="btn btn-primary">Logout</button>
+      </div>
+    </form>
+    <% } %>
   </nav>
 </header>
