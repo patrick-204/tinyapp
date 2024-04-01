@@ -139,10 +139,8 @@ app.post("/login", (req, res) => {
 
 // Add an endpoint to handle a POST to /logout
 app.post("/logout", (req, res) => {
-  // Clear the username cookie by setting it to null. Set it to happen right away or doesn't work
-  res.cookie('username', null, { expires: new Date(0) });
-
-  // console.log(res.cookie('username', undefined));
+  // Clear the username cookie by implementing the clearCookie method
+  res.clearCookie('username')
 
   // Redirect the browser to the "/urls" page
   res.redirect("/urls");
