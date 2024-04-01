@@ -31,7 +31,12 @@
           placeholder="Username"
           style="width: 300px; margin: 1em"
         />
+        <!-- Login button -->
         <button type="submit" class="btn btn-primary">Login</button>
+      </div>
+      <!-- Button that links to registration page -->
+      <div class="navbar-nav">
+        <a class="nav-item nav-link" href="/register">Register</a>
       </div>
     </form>
     <!-- If the user is logged in then display form that shows username and logout button -->
@@ -39,7 +44,7 @@
     <form class="form-inline" action="/logout" method="POST">
       <div class="form-group mb-2">
         <!-- Add label to form to show logged in as username/cookie -->
-        <label>Logged in as: <%= username %>!</label>
+        <label>Logged in as: <%= username %>@gmail.com</label>
         <button type="submit" class="btn btn-primary">Logout</button>
       </div>
     </form>
