@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser');
 const app = express();
 
 // Define default port for server to listen on
-const PORT = 8080;
+const PORT = 8090;
 
 // Function the generates a random 6 alphanumeric string
 function generateRandomString() {
@@ -89,6 +89,12 @@ app.get("/u/:id", (req, res) => {
   // Redirect to the long URL using the short URL
   res.redirect(longURL);
 });
+
+// Create a GET /register endpoint, which returns the register template
+app.get("/register", (req, res) => {
+  // render the Register page
+  res.render("register")
+})
 
 // Add POST route handler to receive the form submission
 app.post("/urls", (req, res) => {
