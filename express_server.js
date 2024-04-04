@@ -8,13 +8,7 @@ const cookieParser = require('cookie-parser');
 const app = express();
 
 // Define default port for server to listen on
-const PORT = 8090;
-
-// Function the generates a random 6 alphanumeric string
-function generateRandomString() {
-  const randomString = Math.random().toString(36).substring(2, 8);
-  return randomString;
-};
+const PORT = 8080;
 
 // Tell Express to use the cookie-parser middleware
 app.use(cookieParser());
@@ -22,6 +16,7 @@ app.use(cookieParser());
 // Set ejs as the view engine
 app.set("view engine", "ejs");
 
+// URL database
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
@@ -30,6 +25,29 @@ const urlDatabase = {
 // Use the Express 'urlencoded' middleware to parse incoming POST requests containing urlencoded data in their body
 // so that it is accessible by the server in req.body in the form of a string
 app.use(express.urlencoded({ extended: true }));
+
+// Function the generates a random 6 alphanumeric string
+function generateRandomString() {
+  const randomString = Math.random().toString(36).substring(2, 8);
+  return randomString;
+};
+
+// Generate a random user ID
+const randomUserID = generateRandomString();
+
+// Create global object to store and access the users in the app
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  }
+};
 
 // Calls the callback function that has response "Hello" when GET request is made to 
 // root path of the server
@@ -52,19 +70,23 @@ app.get("/hello", (req, res) => {
 // Add a new route handler for the "/urls" path and pass the url data to the urls_index template
 app.get("/urls", (req, res) => {
   const templateVars = { 
-    // Pass in the username to the urls_index EJS template
-    username: req.cookies["username"],
+    // Pass in the users object and urls to the urls_index EJS template
+    users,
+    userID: req.cookies.user_ID,
     urls: urlDatabase };
 
+    // console.log(req.cookies.user_ID);
+
+  // Render the index page
   res.render("urls_index", templateVars);
 });
 
 // Add a new route handler to render the "urls_new" ejs template
 app.get("/urls/new", (req, res) => {
-  // Pass in the username to the urls_new EJS template
-  const templateVars = { username: req.cookies["username"] };
+  // Pass in the user object to the urls_new EJS template
+  const templateVars = { users, userID: req.cookies.user_ID };
 
-
+  // Render the new page
   res.render("urls_new", templateVars);
 });
 
@@ -73,10 +95,12 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[req.params.id],
-    // Pass in the username to the urls_show EJS template
-    username: req.cookies["username"]
+    // Pass in the users object to the urls_show EJS template
+    users,
+    userID: req.cookies.user_ID
    };
 
+  // Render the show page
   res.render("urls_show", templateVars);
 });
 
@@ -136,8 +160,8 @@ app.post("/urls/:id", (req, res) => {
 
 // Add an endpoint to handle a POST to /login
 app.post("/login", (req, res) => {
-  // Set a cookie named "username" to the value corresponding to the username submitted by the user.
-  res.cookie('username', req.body.username);
+  // Set a user_ID cookie that contains the new user ID
+  res.cookie('user_ID', randomUserID);
 
   // Redirect the browser to the "/urls" page
   res.redirect("/urls");
@@ -146,10 +170,28 @@ app.post("/login", (req, res) => {
 // Add an endpoint to handle a POST to /logout
 app.post("/logout", (req, res) => {
   // Clear the username cookie by implementing the clearCookie method
-  res.clearCookie('username')
+  res.clearCookie('user_ID')
 
   // Redirect the browser to the "/urls" page
   res.redirect("/urls");
+});
+
+// Create the POST endpoint that handles the registration form data
+app.post("/register", (req, res) => {
+  // Define a nested empty object that is assigned the random user ID
+  users[randomUserID] = {};
+
+  // Add a new user to the global users object
+  users[randomUserID].id = randomUserID
+  users[randomUserID].email = req.body.email;
+  users[randomUserID].password =  req.body.password;
+
+  // Set a user_ID cookie that contains the new user ID
+  res.cookie('user_ID', randomUserID);
+
+  // Redirect the user to the /urls page
+  res.redirect("/urls");
+
 });
 
 // Initialize server to listen on PORT for incoming HTTP requests

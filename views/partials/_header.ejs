@@ -18,8 +18,8 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-    <!-- If no user is logged in then display login form with login button -->
-    <% if(!username) { %>
+    <!-- If no user is logged in then display login form with login button. Request the user_ID cookei to do this -->
+    <% if(!userID) { %>
     <!-- Add form that POSTs to "/login" with name attribute "username" -->
     <!-- Add form that POSTs to "/logout" with name attribute "username" -->
     <form class="form-inline" action="/login" method="POST">
@@ -43,8 +43,8 @@
     <% } else { %>
     <form class="form-inline" action="/logout" method="POST">
       <div class="form-group mb-2">
-        <!-- Add label to form to show logged in as username/cookie -->
-        <label>Logged in as: <%= username %>@gmail.com</label>
+        <!-- Add label to form to show logged in as user ID in form of email -->
+        <label>Logged in as: <%= users[userID].email %></label>
         <button type="submit" class="btn btn-primary">Logout</button>
       </div>
     </form>
