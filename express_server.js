@@ -44,6 +44,12 @@ const users = {
   }
 };
 
+// Add an endpoint to handle a GET for /login
+app.get("/login", (req, res) => {
+  // Render the login page
+  res.render("login");
+})
+
 // Add an endpoint to handle a POST to /login
 app.post("/login", (req, res) => {
   // Set a user_ID cookie that contains the new user ID

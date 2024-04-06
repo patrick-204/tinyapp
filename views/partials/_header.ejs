@@ -23,16 +23,9 @@
     <!-- Add form that POSTs to "/login" with name attribute "username" -->
     <!-- Add form that POSTs to "/logout" with name attribute "username" -->
     <form class="form-inline" action="/login" method="POST">
-      <div class="form-group mb-2">
-        <input
-          class="form-control"
-          type="text"
-          name="username"
-          placeholder="Username"
-          style="width: 300px; margin: 1em"
-        />
-        <!-- Login button -->
-        <button type="submit" class="btn btn-primary">Login</button>
+      <!-- Button that links to login page -->
+      <div class="navbar-nav">
+        <a class="nav-item nav-link" href="/login">Login</a>
       </div>
       <!-- Button that links to registration page -->
       <div class="navbar-nav">
