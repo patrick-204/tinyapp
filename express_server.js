@@ -1,6 +1,5 @@
 // Import the express library
 const express = require('express');
-
 // Import the cookie-parser library
 const cookieParser = require('cookie-parser');
 
@@ -10,6 +9,9 @@ const app = express();
 // Define default port for server to listen on
 const PORT = 8080;
 
+// Use the Express 'urlencoded' middleware to parse incoming POST requests containing urlencoded data in their body
+// so that it is accessible by the server in req.body in the form of a string
+app.use(express.urlencoded({ extended: true }));
 // Tell Express to use the cookie-parser middleware
 app.use(cookieParser());
 
@@ -22,18 +24,11 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
-// Use the Express 'urlencoded' middleware to parse incoming POST requests containing urlencoded data in their body
-// so that it is accessible by the server in req.body in the form of a string
-app.use(express.urlencoded({ extended: true }));
-
 // Function the generates a random 6 alphanumeric string
-function generateRandomString() {
+const generateRandomString = function() {
   const randomString = Math.random().toString(36).substring(2, 8);
   return randomString;
 };
-
-// Generate a random user ID
-const randomUserID = generateRandomString();
 
 // Create global object to store and access the users in the app
 const users = {
@@ -47,6 +42,27 @@ const users = {
     email: "user2@example.com",
     password: "dishwasher-funk",
   }
+};
+
+// Add an endpoint to handle a POST to /login
+app.post("/login", (req, res) => {
+  // Set a user_ID cookie that contains the new user ID
+  // res.cookie('user_ID', randomUserID);
+
+  // Redirect the browser to the "/urls" page
+  res.redirect("/urls");
+});
+
+// Helper function to find a user from email
+const findUser = function(email) {
+  for (let user in users) {
+    // If the email matches a user email in the users object then return the users object
+    if (users[user].email === email) return users[user];
+  }
+
+  // If the email does not match then return null
+  return null;
+
 };
 
 // Calls the callback function that has response "Hello" when GET request is made to 
@@ -158,15 +174,6 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
-// Add an endpoint to handle a POST to /login
-app.post("/login", (req, res) => {
-  // Set a user_ID cookie that contains the new user ID
-  res.cookie('user_ID', randomUserID);
-
-  // Redirect the browser to the "/urls" page
-  res.redirect("/urls");
-});
-
 // Add an endpoint to handle a POST to /logout
 app.post("/logout", (req, res) => {
   // Clear the username cookie by implementing the clearCookie method
@@ -178,6 +185,9 @@ app.post("/logout", (req, res) => {
 
 // Create the POST endpoint that handles the registration form data
 app.post("/register", (req, res) => {
+  // Generate a random user ID
+  const randomUserID = generateRandomString();
+
   // Define a nested empty object that is assigned the random user ID
   users[randomUserID] = {};
 
@@ -186,6 +196,29 @@ app.post("/register", (req, res) => {
   users[randomUserID].email = req.body.email;
   users[randomUserID].password =  req.body.password;
 
+  // console.log(users[randomUserID].email);
+
+  // If the email is an empty strings then send back response with 400 status code
+  if (req.body.email.length === 0) {
+    res.status(400).send("Invalid email: The email must be at least 1 character.")
+    return;
+  }
+
+  // If the password is an empty strings then send back response with 400 status code
+  if (req.body.password.length === 0) {
+    res.status(400).send("Invalid password: The password must be at least 1 character.")
+    return;
+  }
+
+  console.log("test");
+  // console.log(findUser(req.body.email));
+
+  // If an account for the same user already exists then send back response with 400 status code
+  if (findUser(req.body.email)) {
+    res.status(400).send("User Login Taken: Try and different ID.")
+    return;
+  }
+
   // Set a user_ID cookie that contains the new user ID
   res.cookie('user_ID', randomUserID);
 
@@ -193,6 +226,8 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 
 });
+
+// console.log(users);
 
 // Initialize server to listen on PORT for incoming HTTP requests
 app.listen(PORT, () => {

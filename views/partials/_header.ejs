@@ -43,8 +43,10 @@
     <% } else { %>
     <form class="form-inline" action="/logout" method="POST">
       <div class="form-group mb-2">
-        <!-- Add label to form to show logged in as user ID in form of email -->
+        <!-- Add label to form to show logged in as user ID in form of email. First check if the mail exists  -->
+        <% if (users && users[userID]) { %>
         <label>Logged in as: <%= users[userID].email %></label>
+        <% } %>
         <button type="submit" class="btn btn-primary">Logout</button>
       </div>
     </form>
