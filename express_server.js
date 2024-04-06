@@ -57,7 +57,7 @@ app.post("/login", (req, res) => {
 const findUser = function(email) {
   for (let user in users) {
     // If the email matches a user email in the users object then return the users object
-    if (users[user].email === email) return users[user];
+    if (users[user].email === email) return users;
   }
 
   // If the email does not match then return null
@@ -188,16 +188,6 @@ app.post("/register", (req, res) => {
   // Generate a random user ID
   const randomUserID = generateRandomString();
 
-  // Define a nested empty object that is assigned the random user ID
-  users[randomUserID] = {};
-
-  // Add a new user to the global users object
-  users[randomUserID].id = randomUserID
-  users[randomUserID].email = req.body.email;
-  users[randomUserID].password =  req.body.password;
-
-  // console.log(users[randomUserID].email);
-
   // If the email is an empty strings then send back response with 400 status code
   if (req.body.email.length === 0) {
     res.status(400).send("Invalid email: The email must be at least 1 character.")
@@ -210,14 +200,19 @@ app.post("/register", (req, res) => {
     return;
   }
 
-  console.log("test");
-  // console.log(findUser(req.body.email));
-
   // If an account for the same user already exists then send back response with 400 status code
   if (findUser(req.body.email)) {
     res.status(400).send("User Login Taken: Try and different ID.")
     return;
   }
+
+    // Define a nested empty object that is assigned the random user ID
+    users[randomUserID] = {};
+
+    // Add a new user to the global users object
+    users[randomUserID].id = randomUserID
+    users[randomUserID].email = req.body.email;
+    users[randomUserID].password =  req.body.password;
 
   // Set a user_ID cookie that contains the new user ID
   res.cookie('user_ID', randomUserID);
