@@ -18,11 +18,8 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-    <!-- If no user is logged in then display login form with login button. Request the user_ID cookei to do this -->
+    <!-- If no user is logged in then display login link. Request the user_ID cookei to do this -->
     <% if(!userID) { %>
-    <!-- Add form that POSTs to "/login" with name attribute "username" -->
-    <!-- Add form that POSTs to "/logout" with name attribute "username" -->
-    <form class="form-inline" action="/login" method="POST">
       <!-- Button that links to login page -->
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/login">Login</a>
@@ -31,7 +28,6 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/register">Register</a>
       </div>
-    </form>
     <!-- If the user is logged in then display form that shows username and logout button -->
     <% } else { %>
     <form class="form-inline" action="/logout" method="POST">

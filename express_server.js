@@ -52,8 +52,10 @@ app.get("/login", (req, res) => {
 
 // Add an endpoint to handle a POST to /login
 app.post("/login", (req, res) => {
-  // Set a user_ID cookie that contains the new user ID
-  // res.cookie('user_ID', randomUserID);
+  // Define the username and password by accessing req.body
+  const username = req.body.username;
+  const password = req.aborted.password;
+
 
   // Redirect the browser to the "/urls" page
   res.redirect("/urls");
