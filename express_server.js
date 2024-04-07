@@ -58,8 +58,21 @@ const findUser = function(email) {
 
 // Add an endpoint to handle a GET for /login
 app.get("/login", (req, res) => {
-  // Render the login page
-  res.render("login");
+  // Request the user ID from the cookie and define new constant
+  const userID = req.cookies.user_id;
+
+  // If the user is already logged in then redirect to /urls page
+  if (userID) {
+    res.redirect("/urls");
+  } else {
+    res.render("login"); // Render the login page
+  }
+
+  // // If there is no cookie for the user ID then return error message
+  // if (!userID) {
+  //   return res.status(401).send("No user ID found: Login to see this page.");
+  // }
+  
 })
 
 // Add an endpoint to handle a POST to /login
@@ -96,9 +109,16 @@ app.post("/login", (req, res) => {
 
 // Create a GET /register endpoint, which returns the register template
 app.get("/register", (req, res) => {
-  // render the Register page
-  res.render("register")
-})
+  // Request the user ID from the cookie and define new constant
+  const userID = req.cookies.user_id;
+
+  // Redirect to the /urls page if the user is already logged in
+  if (userID) {
+    res.redirect("/urls");
+  } else {
+    res.render("register") // Render the register page if not logged in
+  }
+});
 
 // Create the POST endpoint that handles the registration form data
 app.post("/register", (req, res) => {
@@ -138,8 +158,8 @@ app.post("/register", (req, res) => {
   // Set a user_ID cookie that contains the new user ID
   res.cookie('user_id', randomUserID);
 
-  // Redirect the user to the /urls page
-  res.redirect("/Login");
+  // Redirect the user to the /login page
+  res.redirect("/login");
 
 });
 
@@ -176,11 +196,20 @@ app.get("/urls", (req, res) => {
 
 // Add a new route handler to render the "urls_new" ejs template
 app.get("/urls/new", (req, res) => {
-  // Pass in the user object to the urls_new EJS template
-  const templateVars = { users, user_id: req.cookies.user_id };
+  // Request the user ID from the cookie and define new constant
+  const userID = req.cookies.user_id;
 
-  // Render the new page
-  res.render("urls_new", templateVars);
+  // Redirect to the /login page if the user is not logged in
+  if (!userID) {
+    res.redirect("/login");
+  } else {
+    // Pass in the user object to the urls_new EJS template
+    const templateVars = { users, user_id: req.cookies.user_id };
+
+    // Render the new page
+    res.render("urls_new", templateVars);
+  }
+
 });
 
 // Add a new route handler for the "/urls/:id" path and pass the url data to the urls_show template
@@ -199,22 +228,41 @@ app.get("/urls/:id", (req, res) => {
 
 // Route handler for short URL requests. Redirects to appropriate long URL
 app.get("/u/:id", (req, res) => {
+  // Define the short URL ID as new constant
+  const id = req.params.id;
 
-  // Assign the longURL the value of the urlDatabase object value associated with the given ID
-  const longURL = urlDatabase[req.params.id];
+  for (let key in urlDatabase) {
+    // Send HTML message to user explaining the shortended URL does not exist
+    if (id === key) {
+      // Assign the longURL the value of the urlDatabase object value associated with the given ID
+      const longURL = urlDatabase[req.params.id];
 
-  // Redirect to the long URL using the short URL
-  res.redirect(longURL);
+      // Redirect to the long URL using the short URL
+      res.redirect(longURL);
+    } 
+  }
+
+  res.status(403).send("The shortened URL does not exist.");
+
 });
 
 // Add POST route handler to receive the form submission
 app.post("/urls", (req, res) => {
-  // Save the user entered URL to the URL database object with the radomly generated ID as the key
-  let id = generateRandomString();
-  urlDatabase[id] = req.body.longURL;
+  // Request the user ID from the cookie and define new constant
+  const userID = req.cookies.user_id;
 
-  // Redirect to "/urls/:id" path so the user can see the newly added URL
-  res.redirect(`/urls/${id}`);
+  // Send HTML message to user explaining why they can't shorten urls if the user is not logged in
+  if (!userID) {
+    res.status(403).send("Must be logged in to shorten URLs.");
+  } else {
+    // Save the user entered URL to the URL database object with the radomly generated ID as the key
+    let id = generateRandomString();
+    urlDatabase[id] = req.body.longURL;
+
+    // Redirect to "/urls/:id" path so the user can see the newly added URL
+    res.redirect(`/urls/${id}`);
+  }
+
 });
 
 // Add a POST route that removes a URL resource: POST /urls/:id/delete
