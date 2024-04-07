@@ -19,7 +19,7 @@
       </div>
     </div>
     <!-- If no user is logged in then display login link. Request the user_ID cookei to do this -->
-    <% if(!userID) { %>
+    <% if(!user_id || !users[user_id]) { %>
       <!-- Button that links to login page -->
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/login">Login</a>
@@ -29,13 +29,13 @@
         <a class="nav-item nav-link" href="/register">Register</a>
       </div>
     <!-- If the user is logged in then display form that shows username and logout button -->
-    <% } else { %>
+    <% } else if (user_id && users[user_id]) { %>
     <form class="form-inline" action="/logout" method="POST">
       <div class="form-group mb-2">
         <!-- Add label to form to show logged in as user ID in form of email. First check if the mail exists  -->
-        <% if (users && users[userID]) { %>
-        <label>Logged in as: <%= users[userID].email %></label>
-        <% } %>
+        <!-- <% if (user_id) { %> -->
+        <label>Logged in as: <%= users[user_id].email %></label>
+        <!-- <% } %> -->
         <button type="submit" class="btn btn-primary">Logout</button>
       </div>
     </form>

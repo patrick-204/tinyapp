@@ -44,23 +44,6 @@ const users = {
   }
 };
 
-// Add an endpoint to handle a GET for /login
-app.get("/login", (req, res) => {
-  // Render the login page
-  res.render("login");
-})
-
-// Add an endpoint to handle a POST to /login
-app.post("/login", (req, res) => {
-  // Define the username and password by accessing req.body
-  const username = req.body.username;
-  const password = req.aborted.password;
-
-
-  // Redirect the browser to the "/urls" page
-  res.redirect("/urls");
-});
-
 // Helper function to find a user from email
 const findUser = function(email) {
   for (let user in users) {
@@ -72,6 +55,42 @@ const findUser = function(email) {
   return null;
 
 };
+
+// Add an endpoint to handle a GET for /login
+app.get("/login", (req, res) => {
+  // Render the login page
+  res.render("login");
+})
+
+// Add an endpoint to handle a POST to /login
+app.post("/login", (req, res) => {
+  // Define a found user variable that stores the result of the findUser function
+  const foundUser = findUser(req.body.username);
+
+  // Define the username and password by accessing req.body
+  const username = req.body.username;
+  const password = req.password;
+
+  // Generate a random user ID
+  const randomUserID = generateRandomString();
+
+  // If a user with the login email cannot be found, then return response with status 403
+  if (!foundUser) {
+    res.status(403).send("Email not found: Please register");
+  }
+
+  // If a user that matches the email is found, then verify the password entered by the user
+  // matches what is stored
+  if (password !== foundUser.password) {
+    res.status(403).send("Incorrect Password");
+  }
+
+  // Set the user_id cookie to match the user's random ID
+  res.cookie('user_id', randomUserID);
+
+  // Redirect the browser to the "/urls" page
+  res.redirect("/urls");
+});
 
 // Calls the callback function that has response "Hello" when GET request is made to 
 // root path of the server
@@ -96,10 +115,9 @@ app.get("/urls", (req, res) => {
   const templateVars = { 
     // Pass in the users object and urls to the urls_index EJS template
     users,
-    userID: req.cookies.user_ID,
+    user_id: req.cookies.user_id,
     urls: urlDatabase };
 
-    // console.log(req.cookies.user_ID);
 
   // Render the index page
   res.render("urls_index", templateVars);
@@ -108,7 +126,7 @@ app.get("/urls", (req, res) => {
 // Add a new route handler to render the "urls_new" ejs template
 app.get("/urls/new", (req, res) => {
   // Pass in the user object to the urls_new EJS template
-  const templateVars = { users, userID: req.cookies.user_ID };
+  const templateVars = { users, user_id: req.cookies.user_id };
 
   // Render the new page
   res.render("urls_new", templateVars);
@@ -121,7 +139,7 @@ app.get("/urls/:id", (req, res) => {
     longURL: urlDatabase[req.params.id],
     // Pass in the users object to the urls_show EJS template
     users,
-    userID: req.cookies.user_ID
+    user_id: req.cookies.user_id
    };
 
   // Render the show page
@@ -185,10 +203,10 @@ app.post("/urls/:id", (req, res) => {
 // Add an endpoint to handle a POST to /logout
 app.post("/logout", (req, res) => {
   // Clear the username cookie by implementing the clearCookie method
-  res.clearCookie('user_ID')
+  res.clearCookie('user_id');
 
-  // Redirect the browser to the "/urls" page
-  res.redirect("/urls");
+  // Redirect the browser to the "/login" page
+  res.redirect("/login");
 });
 
 // Create the POST endpoint that handles the registration form data
@@ -223,7 +241,7 @@ app.post("/register", (req, res) => {
     users[randomUserID].password =  req.body.password;
 
   // Set a user_ID cookie that contains the new user ID
-  res.cookie('user_ID', randomUserID);
+  res.cookie('user_id', randomUserID);
 
   // Redirect the user to the /urls page
   res.redirect("/urls");
