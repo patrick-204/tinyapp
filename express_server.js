@@ -47,8 +47,8 @@ const users = {
 // Helper function to find a user from email
 const findUser = function(email) {
   for (let user in users) {
-    // If the email matches a user email in the users object then return the users object
-    if (users[user].email === email) return users;
+    // If the email matches a user email in the users object then return the user object
+    if (users[user].email === email) return users[user];
   }
 
   // If the email does not match then return null
@@ -64,15 +64,17 @@ app.get("/login", (req, res) => {
 
 // Add an endpoint to handle a POST to /login
 app.post("/login", (req, res) => {
+  // console.log(req.body.email);
+
   // Define a found user variable that stores the result of the findUser function
-  const foundUser = findUser(req.body.username);
+  const foundUser = findUser(req.body.email);
 
   // Define the username and password by accessing req.body
   const username = req.body.username;
-  const password = req.password;
+  const password = req.body.password;
 
   // Generate a random user ID
-  const randomUserID = generateRandomString();
+  const randomUserID = foundUser.id;
 
   // If a user with the login email cannot be found, then return response with status 403
   if (!foundUser) {
@@ -90,6 +92,55 @@ app.post("/login", (req, res) => {
 
   // Redirect the browser to the "/urls" page
   res.redirect("/urls");
+});
+
+// Create a GET /register endpoint, which returns the register template
+app.get("/register", (req, res) => {
+  // render the Register page
+  res.render("register")
+})
+
+// Create the POST endpoint that handles the registration form data
+app.post("/register", (req, res) => {
+  // Generate a random user ID
+  const randomUserID = generateRandomString();
+
+  // Define email and password variables
+  const email = req.body.email;
+  const password = req.body.password;
+
+  // If the email is an empty strings then send back response with 400 status code
+  if (email.length === 0)  {
+    res.status(400).send("Invalid email: The email must be at least 1 character.")
+    return;
+  }
+
+  // If the password is an empty strings then send back response with 400 status code
+  if (password.length === 0) {
+    res.status(400).send("Invalid password: The password must be at least 1 character.")
+    return;
+  }
+
+  // If an account for the same user already exists then send back response with 400 status code
+  if (findUser(email)) {
+    res.status(400).send("User Login Taken: Try and different ID.")
+    return;
+  }
+
+    // Define a nested empty object that is assigned the random user ID
+    users[randomUserID] = {};
+
+    // Add a new user to the global users object
+    users[randomUserID].id = randomUserID;
+    users[randomUserID].email = req.body.email;
+    users[randomUserID].password =  req.body.password;
+
+  // Set a user_ID cookie that contains the new user ID
+  res.cookie('user_id', randomUserID);
+
+  // Redirect the user to the /urls page
+  res.redirect("/Login");
+
 });
 
 // Calls the callback function that has response "Hello" when GET request is made to 
@@ -156,12 +207,6 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
-// Create a GET /register endpoint, which returns the register template
-app.get("/register", (req, res) => {
-  // render the Register page
-  res.render("register")
-})
-
 // Add POST route handler to receive the form submission
 app.post("/urls", (req, res) => {
   // Save the user entered URL to the URL database object with the radomly generated ID as the key
@@ -207,45 +252,6 @@ app.post("/logout", (req, res) => {
 
   // Redirect the browser to the "/login" page
   res.redirect("/login");
-});
-
-// Create the POST endpoint that handles the registration form data
-app.post("/register", (req, res) => {
-  // Generate a random user ID
-  const randomUserID = generateRandomString();
-
-  // If the email is an empty strings then send back response with 400 status code
-  if (req.body.email.length === 0) {
-    res.status(400).send("Invalid email: The email must be at least 1 character.")
-    return;
-  }
-
-  // If the password is an empty strings then send back response with 400 status code
-  if (req.body.password.length === 0) {
-    res.status(400).send("Invalid password: The password must be at least 1 character.")
-    return;
-  }
-
-  // If an account for the same user already exists then send back response with 400 status code
-  if (findUser(req.body.email)) {
-    res.status(400).send("User Login Taken: Try and different ID.")
-    return;
-  }
-
-    // Define a nested empty object that is assigned the random user ID
-    users[randomUserID] = {};
-
-    // Add a new user to the global users object
-    users[randomUserID].id = randomUserID
-    users[randomUserID].email = req.body.email;
-    users[randomUserID].password =  req.body.password;
-
-  // Set a user_ID cookie that contains the new user ID
-  res.cookie('user_id', randomUserID);
-
-  // Redirect the user to the /urls page
-  res.redirect("/urls");
-
 });
 
 // console.log(users);
