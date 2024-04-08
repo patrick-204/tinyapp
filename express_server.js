@@ -106,13 +106,13 @@ app.post("/login", (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
-  // Generate a random user ID
-  const randomUserID = foundUser.id;
-
   // If a user with the login email cannot be found, then return response with status 403
   if (!foundUser) {
     res.status(403).send("Email not found: Please register");
   }
+
+  // Generate a random user ID
+  const randomUserID = foundUser.id;
 
   // If a user that matches the email is found, then verify the password entered by the user
   // matches what is stored
@@ -149,9 +149,6 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  // Define the hashed password constant
-  const hashedPassword = bcrypt.hashSync(password, 10);
-
   // If the email is an empty strings then send back response with 400 status code
   if (email.length === 0)  {
     res.status(400).send("Invalid email: The email must be at least 1 character.")
@@ -164,19 +161,22 @@ app.post("/register", (req, res) => {
     return;
   }
 
+  // Define the hashed password constant
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
   // If an account for the same user already exists then send back response with 400 status code
   if (findUser(email)) {
     res.status(400).send("User Login Taken: Try and different ID.")
     return;
   }
 
-    // Define a nested empty object that is assigned the random user ID
-    users[randomUserID] = {};
+  // Define a nested empty object that is assigned the random user ID
+  users[randomUserID] = {};
 
-    // Add a new user to the global users object
-    users[randomUserID].id = randomUserID;
-    users[randomUserID].email = req.body.email;
-    users[randomUserID].password =  hashedPassword;
+  // Add a new user to the global users object
+  users[randomUserID].id = randomUserID;
+  users[randomUserID].email = req.body.email;
+  users[randomUserID].password =  hashedPassword;
 
   // Redirect the user to the /login page
   res.redirect("/login");
