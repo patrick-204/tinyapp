@@ -1,7 +1,11 @@
 // Import the express library
 const express = require('express');
+
 // Import the cookie-parser library
 const cookieParser = require('cookie-parser');
+
+// Import the bcryptjs package
+const bcrypt = require("bcryptjs");
 
 // Define the app as an instance of express
 const app = express();
@@ -90,18 +94,11 @@ app.get("/login", (req, res) => {
   } else {
     res.render("login"); // Render the login page
   }
-
-  // // If there is no cookie for the user ID then return error message
-  // if (!userID) {
-  //   return res.status(401).send("No user ID found: Login to see this page.");
-  // }
   
 })
 
 // Add an endpoint to handle a POST to /login
 app.post("/login", (req, res) => {
-  // console.log(req.body.email);
-
   // Define a found user variable that stores the result of the findUser function
   const foundUser = findUser(req.body.email);
 
@@ -119,7 +116,7 @@ app.post("/login", (req, res) => {
 
   // If a user that matches the email is found, then verify the password entered by the user
   // matches what is stored
-  if (password !== foundUser.password) {
+  if (!bcrypt.compareSync(password, foundUser.password)) {
     res.status(403).send("Incorrect Password");
   }
 
@@ -148,9 +145,12 @@ app.post("/register", (req, res) => {
   // Generate a random user ID
   const randomUserID = generateRandomString();
 
-  // Define email and password variables
+  // Define email and password constants
   const email = req.body.email;
   const password = req.body.password;
+
+  // Define the hashed password constant
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
   // If the email is an empty strings then send back response with 400 status code
   if (email.length === 0)  {
@@ -176,7 +176,7 @@ app.post("/register", (req, res) => {
     // Add a new user to the global users object
     users[randomUserID].id = randomUserID;
     users[randomUserID].email = req.body.email;
-    users[randomUserID].password =  req.body.password;
+    users[randomUserID].password =  hashedPassword;
 
   // Redirect the user to the /login page
   res.redirect("/login");
