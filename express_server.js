@@ -20,8 +20,14 @@ app.set("view engine", "ejs");
 
 // URL database
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b2xVn2: {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "userRandomID"
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "user2RandomID"
+  }
 };
 
 // Function the generates a random 6 alphanumeric string
@@ -55,6 +61,23 @@ const findUser = function(email) {
   return null;
 
 };
+
+// Helper function that returns the URLs where the userID is equal to the id of the logged in user
+const urlsForUser = function(id) {
+  // Define empty array to store the user specific URL(s) in
+  let userURL = {};
+
+  // Filter the urlDatabase by comparing the userID with the logged in user's cookie.
+  // Only send ther logged in user URL to template
+  for (let key in urlDatabase) {
+    if (id === urlDatabase[key].userID) {
+      userURL[key] = urlDatabase[key].longURL;
+    }
+  }
+
+  // Return the array of URL(s)
+  return userURL;
+}
 
 // Add an endpoint to handle a GET for /login
 app.get("/login", (req, res) => {
@@ -155,11 +178,11 @@ app.post("/register", (req, res) => {
     users[randomUserID].email = req.body.email;
     users[randomUserID].password =  req.body.password;
 
-  // Set a user_ID cookie that contains the new user ID
-  res.cookie('user_id', randomUserID);
-
   // Redirect the user to the /login page
   res.redirect("/login");
+
+  // Set a user_ID cookie that contains the new user ID
+  res.cookie('user_id', randomUserID);
 
 });
 
@@ -183,15 +206,29 @@ app.get("/hello", (req, res) => {
 
 // Add a new route handler for the "/urls" path and pass the url data to the urls_index template
 app.get("/urls", (req, res) => {
-  const templateVars = { 
-    // Pass in the users object and urls to the urls_index EJS template
-    users,
-    user_id: req.cookies.user_id,
-    urls: urlDatabase };
+  // Request the user ID from the cookie and define new constant
+  const userID = req.cookies.user_id;
+
+  // If the iser is not logged in then they cannot see any shortened URLs
+  if (!userID) {
+    res.status(403).send("Must be logged in to view ID associated URLs.")
+  } else {
+    // Call the urlsForUser(id) helper function which returns the URLs 
+    // where the userID is equal to the id of the logged in user
+    let userURL = urlsForUser(userID);
+
+    const templateVars = { 
+      // Pass in the users object and urls to the urls_index EJS template
+      users,
+      user_id: req.cookies.user_id,
+      urls: userURL
+     };
 
 
-  // Render the index page
-  res.render("urls_index", templateVars);
+    // Render the index page
+    res.render("urls_index", templateVars);
+  }
+
 });
 
 // Add a new route handler to render the "urls_new" ejs template
@@ -214,16 +251,33 @@ app.get("/urls/new", (req, res) => {
 
 // Add a new route handler for the "/urls/:id" path and pass the url data to the urls_show template
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { 
-    id: req.params.id, 
-    longURL: urlDatabase[req.params.id],
-    // Pass in the users object to the urls_show EJS template
-    users,
-    user_id: req.cookies.user_id
-   };
+  // Request the user ID from the cookie and define new constant
+  const userID = req.cookies.user_id;
 
-  // Render the show page
-  res.render("urls_show", templateVars);
+  // Send HTML message to user explaining they can't see the individual URL page because they are not logged in
+  if (!userID) {
+    res.status(403).send("Must be logged in to view the URL.");
+    return;
+  } 
+  
+  // Check to see if URL belongs to user. If it does then render the ursl_show template with the new data
+  for (let key in urlsForUser(userID)) {
+    if (key === req.params.id) {
+      const templateVars = { 
+        id: req.params.id, 
+        longURL: urlDatabase[req.params.id].longURL,
+        // Pass in the users object to the urls_show EJS template
+        users,
+        user_id: req.cookies.user_id
+       };
+    
+      // Render the show page
+      res.render("urls_show", templateVars);
+    } 
+  }
+
+  // Send HTML message to user explaining they can't see the individual URL page if it doesn't belong to them
+  res.status(403).send("You do not have access to this URL.");
 });
 
 // Route handler for short URL requests. Redirects to appropriate long URL
@@ -235,7 +289,7 @@ app.get("/u/:id", (req, res) => {
     // Send HTML message to user explaining the shortended URL does not exist
     if (id === key) {
       // Assign the longURL the value of the urlDatabase object value associated with the given ID
-      const longURL = urlDatabase[req.params.id];
+      const longURL = urlDatabase[req.params.id].longURL;
 
       // Redirect to the long URL using the short URL
       res.redirect(longURL);
@@ -246,7 +300,7 @@ app.get("/u/:id", (req, res) => {
 
 });
 
-// Add POST route handler to receive the form submission
+// Add POST route handler to receive the form submission for making a new short URL
 app.post("/urls", (req, res) => {
   // Request the user ID from the cookie and define new constant
   const userID = req.cookies.user_id;
@@ -257,7 +311,14 @@ app.post("/urls", (req, res) => {
   } else {
     // Save the user entered URL to the URL database object with the radomly generated ID as the key
     let id = generateRandomString();
-    urlDatabase[id] = req.body.longURL;
+
+    // Create empty object for the ID in case does not exist
+    if (!urlDatabase[id]) {
+      urlDatabase[id] = {};
+    }
+
+    // Set the longURL of the object for the id
+    urlDatabase[id].longURL = req.body.longURL;
 
     // Redirect to "/urls/:id" path so the user can see the newly added URL
     res.redirect(`/urls/${id}`);
@@ -269,11 +330,28 @@ app.post("/urls", (req, res) => {
 // Use Javascript's delete operator to remove the URL.
 // After the resource has been deleted, redirect the client back to the urls_index page
 app.post("/urls/:id/delete", (req, res) => {
+  // Request the user ID from the cookie and define new constant
+  const userID = req.cookies.user_id;
+
+  // Return an error message if the id does not exist
+  if (!urlDatabase[req.params.id]) {
+    return res.status(400).send("The ID in the path does not exist. Please enter a valid ID.");
+  }
+
+  // Send HTML message to user explaining they are not logged in so they cannot edit or delete
+  if (!userID) {
+    return res.status(403).send("Must be logged in to delete URLs.");
+  }
+
+  // Send HTML message to user explaining they do not own the URL if they do not
+  if (urlDatabase[req.params.id].userID !== userID) {
+    return res.status(403).send("This URL does not belong to you so you cannot delete it.");
+  }
   // Get the ID from the request
   const id = req.params.id;
 
   // Delete the URL
-  delete urlDatabase[id];
+  delete urlDatabase[id].longURL;
 
   // Redirect the client back to the url_index page
   res.redirect("/urls");
@@ -283,11 +361,29 @@ app.post("/urls/:id/delete", (req, res) => {
 // value of your stored long URL based on the new value in req.body. Finally, redirect 
 // the client back to /urls
 app.post("/urls/:id", (req, res) => {
+  // Request the user ID from the cookie and define new constant
+  const userID = req.cookies.user_id;
+
+  // Return an error message if the id does not exist
+  if (!urlDatabase[req.params.id]) {
+    return res.status(400).send("The ID in the path does not exist. Please enter a valid ID.");
+  }
+
+  // Send HTML message to user explaining they are not logged in so they cannot edit or delete
+  if (!userID) {
+    return res.status(403).send("Must be logged in to edit URLs.");
+  }
+
+  // Send HTML message to user explaining they do not own the URL if they do not
+  if (urlDatabase[req.params.id].userID !== userID) {
+    return res.status(403).send("This URL does not belong to you so you cannot edit it.");
+  }
+
   // Define the new long URL as the long URL received in the req.body object
   const id = req.body.longURL;
 
   // Replace the old long URL with the new long URL
-  urlDatabase[req.params.id] = id
+  urlDatabase[req.params.id].longURL = id
 
   // Redirect the client back to the url_index page
   res.redirect("/urls");
@@ -301,8 +397,6 @@ app.post("/logout", (req, res) => {
   // Redirect the browser to the "/login" page
   res.redirect("/login");
 });
-
-// console.log(users);
 
 // Initialize server to listen on PORT for incoming HTTP requests
 app.listen(PORT, () => {
