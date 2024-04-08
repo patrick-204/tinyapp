@@ -1,8 +1,8 @@
 // Import the express library
 const express = require('express');
 
-// Import the cookie-parser library
-const cookieParser = require('cookie-parser');
+// Import the cookie-session package
+const cookieSession = require('cookie-session');
 
 // Import the bcryptjs package
 const bcrypt = require("bcryptjs");
@@ -16,8 +16,12 @@ const PORT = 8080;
 // Use the Express 'urlencoded' middleware to parse incoming POST requests containing urlencoded data in their body
 // so that it is accessible by the server in req.body in the form of a string
 app.use(express.urlencoded({ extended: true }));
-// Tell Express to use the cookie-parser middleware
-app.use(cookieParser());
+
+// Tell Express to use the cookie-session middleware
+app.use(cookieSession({
+  name: 'session',
+  keys: ['secret'],
+}));
 
 // Set ejs as the view engine
 app.set("view engine", "ejs");
@@ -85,8 +89,8 @@ const urlsForUser = function(id) {
 
 // Add an endpoint to handle a GET for /login
 app.get("/login", (req, res) => {
-  // Request the user ID from the cookie and define new constant
-  const userID = req.cookies.user_id;
+  // Request the user ID from the encrypted cookie and define new constant
+  const userID = req.session.user_id;
 
   // If the user is already logged in then redirect to /urls page
   if (userID) {
@@ -103,25 +107,27 @@ app.post("/login", (req, res) => {
   const foundUser = findUser(req.body.email);
 
   // Define the username and password by accessing req.body
-  const username = req.body.username;
   const password = req.body.password;
 
   // If a user with the login email cannot be found, then return response with status 403
   if (!foundUser) {
-    res.status(403).send("Email not found: Please register");
+    return res.status(403).send("Email not found: Please register");
+  }
+
+  // If a user that matches the email is found, then verify the password entered by the user
+  // matches what is stored
+  if (!bcrypt.compareSync(password, foundUser.password)) { 
+    return res.status(403).send("Incorrect Password");
   }
 
   // Generate a random user ID
   const randomUserID = foundUser.id;
 
-  // If a user that matches the email is found, then verify the password entered by the user
-  // matches what is stored
-  if (!bcrypt.compareSync(password, foundUser.password)) {
-    res.status(403).send("Incorrect Password");
-  }
-
   // Set the user_id cookie to match the user's random ID
-  res.cookie('user_id', randomUserID);
+  // res.cookie('user_id', randomUserID);
+
+  // Set an encrypted cookie inside the session object to the value of the random user ID 
+  req.session.user_id = randomUserID;
 
   // Redirect the browser to the "/urls" page
   res.redirect("/urls");
@@ -129,8 +135,8 @@ app.post("/login", (req, res) => {
 
 // Create a GET /register endpoint, which returns the register template
 app.get("/register", (req, res) => {
-  // Request the user ID from the cookie and define new constant
-  const userID = req.cookies.user_id;
+  // Request the user ID from the encrypted cookie and define new constant
+  const userID = req.session.user_id;
 
   // Redirect to the /urls page if the user is already logged in
   if (userID) {
@@ -151,14 +157,12 @@ app.post("/register", (req, res) => {
 
   // If the email is an empty strings then send back response with 400 status code
   if (email.length === 0)  {
-    res.status(400).send("Invalid email: The email must be at least 1 character.")
-    return;
+    return res.status(400).send("Invalid email: The email must be at least 1 character.")
   }
 
   // If the password is an empty strings then send back response with 400 status code
   if (password.length === 0) {
-    res.status(400).send("Invalid password: The password must be at least 1 character.")
-    return;
+    return res.status(400).send("Invalid password: The password must be at least 1 character.")
   }
 
   // Define the hashed password constant
@@ -166,8 +170,7 @@ app.post("/register", (req, res) => {
 
   // If an account for the same user already exists then send back response with 400 status code
   if (findUser(email)) {
-    res.status(400).send("User Login Taken: Try and different ID.")
-    return;
+    return res.status(400).send("User Login Taken: Try and different ID.")
   }
 
   // Define a nested empty object that is assigned the random user ID
@@ -182,7 +185,10 @@ app.post("/register", (req, res) => {
   res.redirect("/login");
 
   // Set a user_ID cookie that contains the new user ID
-  res.cookie('user_id', randomUserID);
+  // res.cookie('user_id', randomUserID);
+
+  // Set an encrypted cookie inside the session object to the value of the random user ID 
+  req.session.user_id = randomUserID;
 
 });
 
@@ -206,12 +212,12 @@ app.get("/hello", (req, res) => {
 
 // Add a new route handler for the "/urls" path and pass the url data to the urls_index template
 app.get("/urls", (req, res) => {
-  // Request the user ID from the cookie and define new constant
-  const userID = req.cookies.user_id;
+  // Request the user ID from the encrypted cookie and define new constant
+  const userID = req.session.user_id;
 
   // If the iser is not logged in then they cannot see any shortened URLs
   if (!userID) {
-    res.status(403).send("Must be logged in to view ID associated URLs.")
+    return res.status(403).send("Must be logged in to view ID associated URLs.")
   } else {
     // Call the urlsForUser(id) helper function which returns the URLs 
     // where the userID is equal to the id of the logged in user
@@ -220,7 +226,7 @@ app.get("/urls", (req, res) => {
     const templateVars = { 
       // Pass in the users object and urls to the urls_index EJS template
       users,
-      user_id: req.cookies.user_id,
+      user_id: req.session.user_id,
       urls: userURL
      };
 
@@ -233,15 +239,15 @@ app.get("/urls", (req, res) => {
 
 // Add a new route handler to render the "urls_new" ejs template
 app.get("/urls/new", (req, res) => {
-  // Request the user ID from the cookie and define new constant
-  const userID = req.cookies.user_id;
+  // Request the user ID from the encrypted cookie and define new constant
+  const userID = req.session.user_id;
 
   // Redirect to the /login page if the user is not logged in
   if (!userID) {
     res.redirect("/login");
   } else {
     // Pass in the user object to the urls_new EJS template
-    const templateVars = { users, user_id: req.cookies.user_id };
+    const templateVars = { users, user_id: req.session.user_id };
 
     // Render the new page
     res.render("urls_new", templateVars);
@@ -251,13 +257,12 @@ app.get("/urls/new", (req, res) => {
 
 // Add a new route handler for the "/urls/:id" path and pass the url data to the urls_show template
 app.get("/urls/:id", (req, res) => {
-  // Request the user ID from the cookie and define new constant
-  const userID = req.cookies.user_id;
+  // Request the user ID from the encrypted cookie and define new constant
+  const userID = req.session.user_id;
 
   // Send HTML message to user explaining they can't see the individual URL page because they are not logged in
   if (!userID) {
-    res.status(403).send("Must be logged in to view the URL.");
-    return;
+    return res.status(403).send("Must be logged in to view the URL.");
   } 
   
   // Check to see if URL belongs to user. If it does then render the ursl_show template with the new data
@@ -268,7 +273,7 @@ app.get("/urls/:id", (req, res) => {
         longURL: urlDatabase[req.params.id].longURL,
         // Pass in the users object to the urls_show EJS template
         users,
-        user_id: req.cookies.user_id
+        user_id: req.session.user_id
        };
     
       // Render the show page
@@ -277,7 +282,7 @@ app.get("/urls/:id", (req, res) => {
   }
 
   // Send HTML message to user explaining they can't see the individual URL page if it doesn't belong to them
-  res.status(403).send("You do not have access to this URL.");
+  return res.status(403).send("You do not have access to this URL.");
 });
 
 // Route handler for short URL requests. Redirects to appropriate long URL
@@ -296,18 +301,18 @@ app.get("/u/:id", (req, res) => {
     } 
   }
 
-  res.status(403).send("The shortened URL does not exist.");
+  return res.status(403).send("The shortened URL does not exist.");
 
 });
 
 // Add POST route handler to receive the form submission for making a new short URL
 app.post("/urls", (req, res) => {
-  // Request the user ID from the cookie and define new constant
-  const userID = req.cookies.user_id;
+  // Request the user ID from the encrypted cookie and define new constant
+  const userID = req.session.user_id;
 
   // Send HTML message to user explaining why they can't shorten urls if the user is not logged in
   if (!userID) {
-    res.status(403).send("Must be logged in to shorten URLs.");
+    return res.status(403).send("Must be logged in to shorten URLs.");
   } else {
     // Save the user entered URL to the URL database object with the radomly generated ID as the key
     let id = generateRandomString();
@@ -330,8 +335,8 @@ app.post("/urls", (req, res) => {
 // Use Javascript's delete operator to remove the URL.
 // After the resource has been deleted, redirect the client back to the urls_index page
 app.post("/urls/:id/delete", (req, res) => {
-  // Request the user ID from the cookie and define new constant
-  const userID = req.cookies.user_id;
+  // Request the user ID from the encrypted cookie and define new constant
+  const userID = req.session.user_id;
 
   // Return an error message if the id does not exist
   if (!urlDatabase[req.params.id]) {
@@ -361,8 +366,8 @@ app.post("/urls/:id/delete", (req, res) => {
 // value of your stored long URL based on the new value in req.body. Finally, redirect 
 // the client back to /urls
 app.post("/urls/:id", (req, res) => {
-  // Request the user ID from the cookie and define new constant
-  const userID = req.cookies.user_id;
+  // Request the user ID from the encrypted cookie and define new constant
+  const userID = req.session.user_id;
 
   // Return an error message if the id does not exist
   if (!urlDatabase[req.params.id]) {
@@ -391,8 +396,8 @@ app.post("/urls/:id", (req, res) => {
 
 // Add an endpoint to handle a POST to /logout
 app.post("/logout", (req, res) => {
-  // Clear the username cookie by implementing the clearCookie method
-  res.clearCookie('user_id');
+  // Log the user out and clear the encrypted cookie from the broswer by setting the req.session object to null
+  req.session = null;
 
   // Redirect the browser to the "/login" page
   res.redirect("/login");
