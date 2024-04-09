@@ -5,7 +5,10 @@ const express = require('express');
 const cookieSession = require('cookie-session');
 
 // Import the bcryptjs package
-const bcrypt = require("bcryptjs");
+const bcrypt = require('bcryptjs');
+
+// Import helper functions
+const findUser = require('./helpers');
 
 // Define the app as an instance of express
 const app = express();
@@ -58,18 +61,6 @@ const users = {
   }
 };
 
-// Helper function to find a user from email
-const findUser = function(email) {
-  for (let user in users) {
-    // If the email matches a user email in the users object then return the user object
-    if (users[user].email === email) return users[user];
-  }
-
-  // If the email does not match then return null
-  return null;
-
-};
-
 // Helper function that returns the URLs where the userID is equal to the id of the logged in user
 const urlsForUser = function(id) {
   // Define empty array to store the user specific URL(s) in
@@ -104,7 +95,7 @@ app.get("/login", (req, res) => {
 // Add an endpoint to handle a POST to /login
 app.post("/login", (req, res) => {
   // Define a found user variable that stores the result of the findUser function
-  const foundUser = findUser(req.body.email);
+  const foundUser = findUser(req.body.email, users);
 
   // Define the username and password by accessing req.body
   const password = req.body.password;
@@ -169,7 +160,7 @@ app.post("/register", (req, res) => {
   const hashedPassword = bcrypt.hashSync(password, 10);
 
   // If an account for the same user already exists then send back response with 400 status code
-  if (findUser(email)) {
+  if (findUser(email, urlDatabase)) {
     return res.status(400).send("User Login Taken: Try and different ID.")
   }
 
