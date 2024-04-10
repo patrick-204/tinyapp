@@ -190,7 +190,7 @@ app.get("/urls", (req, res) => {
   } else {
     // Call the urlsForUser(id) helper function which returns the URLs 
     // where the userID is equal to the id of the logged in user
-    let userURL = urlsForUser(userID);
+    let userURL = urlsForUser(userID, urlDatabase);
 
     const templateVars = { 
       // Pass in the users object and urls to the urls_index EJS template
@@ -376,6 +376,3 @@ app.post("/logout", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`)
 });
-
-// Export 
-module.exports = { urlDatabase };

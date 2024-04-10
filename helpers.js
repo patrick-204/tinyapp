@@ -1,6 +1,3 @@
-// Import from express server
-const { urlDatabase } = require('./express_server');
-
 // Helper function to find a user from email
 const findUser = function(email, userDatabase) {
   for (let user in userDatabase) {
@@ -19,7 +16,7 @@ const generateRandomString = function() {
 };
 
 // Helper function that returns the URLs where the userID is equal to the id of the logged in user
-const urlsForUser = function(id) {
+const urlsForUser = function(id, urlDatabase) {
   // Define empty array to store the user specific URL(s) in
   let userURL = {};
 
