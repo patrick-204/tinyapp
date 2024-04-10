@@ -4,17 +4,17 @@ const express = require('express');
 // Import the cookie-session package
 const cookieSession = require('cookie-session');
 
-// Import the bcryptjs package
-const bcrypt = require('bcryptjs');
-
-// Import helper functions
-const { findUser } = require('./helpers');
+// Import the helper functions
+const { findUser, generateRandomString, urlsForUser } = require('./helpers');
 
 // Define the app as an instance of express
 const app = express();
 
 // Define default port for server to listen on
 const PORT = 8080;
+
+// Import the bcryptjs package
+const bcrypt = require('bcryptjs');
 
 // Use the Express 'urlencoded' middleware to parse incoming POST requests containing urlencoded data in their body
 // so that it is accessible by the server in req.body in the form of a string
@@ -41,12 +41,6 @@ const urlDatabase = {
   }
 };
 
-// Function the generates a random 6 alphanumeric string
-const generateRandomString = function() {
-  const randomString = Math.random().toString(36).substring(2, 8);
-  return randomString;
-};
-
 // Create global object to store and access the users in the app
 const users = {
   userRandomID: {
@@ -60,23 +54,6 @@ const users = {
     password: "dishwasher-funk",
   }
 };
-
-// Helper function that returns the URLs where the userID is equal to the id of the logged in user
-const urlsForUser = function(id) {
-  // Define empty array to store the user specific URL(s) in
-  let userURL = {};
-
-  // Filter the urlDatabase by comparing the userID with the logged in user's cookie.
-  // Only send ther logged in user URL to template
-  for (let key in urlDatabase) {
-    if (id === urlDatabase[key].userID) {
-      userURL[key] = urlDatabase[key].longURL;
-    }
-  }
-
-  // Return the array of URL(s)
-  return userURL;
-}
 
 // Add an endpoint to handle a GET for /login
 app.get("/login", (req, res) => {
@@ -165,6 +142,7 @@ app.post("/register", (req, res) => {
   }
 
   // Define a nested empty object that is assigned the random user ID
+  console.log(users);
   users[randomUserID] = {};
 
   // Add a new user to the global users object
@@ -219,7 +197,7 @@ app.get("/urls", (req, res) => {
       users,
       user_id: req.session.user_id,
       urls: userURL
-     };
+    };
 
 
     // Render the index page
@@ -265,7 +243,7 @@ app.get("/urls/:id", (req, res) => {
         // Pass in the users object to the urls_show EJS template
         users,
         user_id: req.session.user_id
-       };
+      };
     
       // Render the show page
       res.render("urls_show", templateVars);
@@ -398,3 +376,6 @@ app.post("/logout", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`)
 });
+
+// Export 
+module.exports = { urlDatabase };

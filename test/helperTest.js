@@ -1,6 +1,6 @@
 const { assert } = require('chai');
 
-const { findUser } = require('../helpers.js');
+const { findUser, generateRandomString, urlsForUser } = require('../helpers.js');
 
 const testUsers = {
   "userRandomID": {
@@ -15,6 +15,7 @@ const testUsers = {
   }
 };
 
+// Tests for the find user function
 describe('findUser', function() {
   // Test that checks if email exists in user database
   it('should return a user with valid email', function() {
@@ -26,13 +27,59 @@ describe('findUser', function() {
   });
 
   // Test that checks if undefined is returned when an email that doesn't exist is entered
-  it('should return undefined if email does not exist', function() {
+  it('should return null if email does not exist', function() {
     const notUser = "kdfjhdkfjghe@example.com";
     const user = findUser("user@example.com", notUser);
-    const expected = undefined;
+    const expected = null;
 
     // Check if the user ID is equal to the expected user ID
     assert.equal(user, expected);
+  });
+
+});
+
+// Tests for the generate random string function
+describe('generateRandomString', function() {
+  // Test that checks if returns string of length 6
+  it('should return a string of length 6', function() {
+    const result = generateRandomString()
+
+    // Check if the length of the string is 6
+    assert.lengthOf(result, 6);
+  });
+
+  // Test that checks if is a string
+  it('should return a string', function() {
+    const result = generateRandomString()
+
+    // Check if is string
+    assert.isString(result);
+  });
+
+  // Test that checks if is aplhanumeric
+  it('should return a alphanumeric string', function() {
+    const result = generateRandomString()
+
+    // Check if only alphanumeric chars
+    assert.match(result, /^[a-zA-Z0-9]+$/);
+  });
+
+});
+
+// Tests for the urls for random user function
+describe('urlsForUser', function() {
+  // Test that checks if a url is returned
+  it('should return a url', function() {
+    // Provide a user ID
+    const userID = "userRandomID";
+
+    const result = urlsForUser(userID);
+
+    // Confirm is object
+    assert.isObject(result);
+
+    // Confirm is not empty
+    assert.isNotEmpty(result);
   });
 
 });
