@@ -8,7 +8,7 @@ const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 
 // Import helper functions
-const findUser = require('./helpers');
+const { findUser } = require('./helpers');
 
 // Define the app as an instance of express
 const app = express();

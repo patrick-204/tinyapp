@@ -5,9 +5,9 @@ const findUser = function(email, userDatabase) {
     if (userDatabase[user].email === email) return userDatabase[user];
   }
 
-  // If the email does not match then return null
-  return null;
+  // If the email does not match then return unudefined
+  return undefined;
 };
 
 // Export the findUser function so that can use in express_servr.js
-module.exports = findUser;
+module.exports = { findUser };
