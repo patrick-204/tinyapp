@@ -70,7 +70,7 @@ app.get("/login", (req, res) => {
     res.render("login"); // Render the login page
   }
   
-})
+});
 
 // Add an endpoint to handle a POST to /login
 app.post("/login", (req, res) => {
@@ -87,7 +87,7 @@ app.post("/login", (req, res) => {
 
   // If a user that matches the email is found, then verify the password entered by the user
   // matches what is stored
-  if (!bcrypt.compareSync(password, foundUser.password)) { 
+  if (!bcrypt.compareSync(password, foundUser.password)) {
     return res.status(403).send("Incorrect Password");
   }
 
@@ -97,7 +97,7 @@ app.post("/login", (req, res) => {
   // Set the user_id cookie to match the user's random ID
   // res.cookie('user_id', randomUserID);
 
-  // Set an encrypted cookie inside the session object to the value of the random user ID 
+  // Set an encrypted cookie inside the session object to the value of the random user ID
   req.session.user_id = randomUserID;
 
   // Redirect the browser to the "/urls" page
@@ -113,7 +113,7 @@ app.get("/register", (req, res) => {
   if (userID) {
     res.redirect("/urls");
   } else {
-    res.render("register") // Render the register page if not logged in
+    res.render("register"); // Render the register page if not logged in
   }
 });
 
@@ -128,12 +128,12 @@ app.post("/register", (req, res) => {
 
   // If the email is an empty strings then send back response with 400 status code
   if (email.length === 0)  {
-    return res.status(400).send("Invalid email: The email must be at least 1 character.")
+    return res.status(400).send("Invalid email: The email must be at least 1 character.");
   }
 
   // If the password is an empty strings then send back response with 400 status code
   if (password.length === 0) {
-    return res.status(400).send("Invalid password: The password must be at least 1 character.")
+    return res.status(400).send("Invalid password: The password must be at least 1 character.");
   }
 
   // Define the hashed password constant
@@ -141,7 +141,7 @@ app.post("/register", (req, res) => {
 
   // If an account for the same user already exists then send back response with 400 status code
   if (findUser(email, urlDatabase)) {
-    return res.status(400).send("User Login Taken: Try and different ID.")
+    return res.status(400).send("User Login Taken: Try and different ID.");
   }
 
   // Define a nested empty object that is assigned the random user ID
@@ -158,7 +158,7 @@ app.post("/register", (req, res) => {
   // Set a user_ID cookie that contains the new user ID
   // res.cookie('user_id', randomUserID);
 
-  // Set an encrypted cookie inside the session object to the value of the random user ID 
+  // Set an encrypted cookie inside the session object to the value of the random user ID
   req.session.user_id = randomUserID;
 
 });
@@ -175,7 +175,7 @@ app.get("/", (req, res) => {
   } 
 });
 
-// Calls the callback function that has sends a JSON response to the client when 
+// Calls the callback function that has sends a JSON response to the client when
 // a GET request is sent to the /urls.json path of the server
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
@@ -194,7 +194,7 @@ app.get("/urls", (req, res) => {
 
   // If the iser is not logged in then they cannot see any shortened URLs
   if (!userID) {
-    return res.status(403).send("Must be logged in to view ID associated URLs.")
+    return res.status(403).send("Must be logged in to view ID associated URLs.");
   } else {
     // Call the urlsForUser(id) helper function which returns the URLs 
     // where the userID is equal to the id of the logged in user
@@ -342,7 +342,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
   // Redirect the client back to the url_index page
   res.redirect("/urls");
-})
+});
 
 // Add a POST route that updates a URL resource; POST /urls/:id and have it update the 
 // value of your stored long URL based on the new value in req.body. Finally, redirect 
@@ -370,7 +370,7 @@ app.post("/urls/:id", (req, res) => {
   const id = req.body.longURL;
 
   // Replace the old long URL with the new long URL
-  urlDatabase[req.params.id].longURL = id
+  urlDatabase[req.params.id].longURL = id;
 
   // Redirect the client back to the url_index page
   res.redirect("/urls");
@@ -387,5 +387,5 @@ app.post("/logout", (req, res) => {
 
 // Initialize server to listen on PORT for incoming HTTP requests
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}`)
+  console.log(`Example app listening on port ${PORT}`);
 });

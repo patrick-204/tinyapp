@@ -4,7 +4,7 @@ const { findUser, generateRandomString, urlsForUser } = require('../helpers.js')
 
 const testUsers = {
   "userRandomID": {
-    id: "userRandomID", 
+    id: "userRandomID",
     email: "user@example.com", 
     password: "purple-monkey-dinosaur"
   },
@@ -19,7 +19,7 @@ const testUsers = {
 describe('findUser', function() {
   // Test that checks if email exists in user database
   it('should return a user with valid email', function() {
-    const user = findUser("user@example.com", testUsers)
+    const user = findUser("user@example.com", testUsers);
     const expectedUserID = "userRandomID";
 
     // Check if the user ID is equal to the expected user ID
@@ -42,7 +42,7 @@ describe('findUser', function() {
 describe('generateRandomString', function() {
   // Test that checks if returns string of length 6
   it('should return a string of length 6', function() {
-    const result = generateRandomString()
+    const result = generateRandomString();
 
     // Check if the length of the string is 6
     assert.lengthOf(result, 6);
@@ -50,7 +50,7 @@ describe('generateRandomString', function() {
 
   // Test that checks if is a string
   it('should return a string', function() {
-    const result = generateRandomString()
+    const result = generateRandomString();
 
     // Check if is string
     assert.isString(result);
@@ -58,7 +58,7 @@ describe('generateRandomString', function() {
 
   // Test that checks if is aplhanumeric
   it('should return a alphanumeric string', function() {
-    const result = generateRandomString()
+    const result = generateRandomString();
 
     // Check if only alphanumeric chars
     assert.match(result, /^[a-zA-Z0-9]+$/);
