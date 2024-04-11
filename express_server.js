@@ -20,6 +20,9 @@ const bcrypt = require('bcryptjs');
 // so that it is accessible by the server in req.body in the form of a string
 app.use(express.urlencoded({ extended: true }));
 
+// Add middleware to decode JSON information
+app.use(express.json());
+
 // Tell Express to use the cookie-session middleware
 app.use(cookieSession({
   name: 'session',
@@ -142,7 +145,6 @@ app.post("/register", (req, res) => {
   }
 
   // Define a nested empty object that is assigned the random user ID
-  console.log(users);
   users[randomUserID] = {};
 
   // Add a new user to the global users object
@@ -161,10 +163,16 @@ app.post("/register", (req, res) => {
 
 });
 
-// Calls the callback function that has response "Hello" when GET request is made to 
-// root path of the server
+// Redirects user to /login page if GET request is made to root path of the server
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  // Define user ID 
+  const userID = req.session.user_id;
+
+  // Check if the user is logged in
+  if (!userID) {
+    // Redirect to the login page
+    res.redirect("/login");
+  } 
 });
 
 // Calls the callback function that has sends a JSON response to the client when 
@@ -233,6 +241,11 @@ app.get("/urls/:id", (req, res) => {
   if (!userID) {
     return res.status(403).send("Must be logged in to view the URL.");
   } 
+
+  // Check if the requested URL exists in the database
+  if (!urlDatabase[req.params.id]) {
+    return res.status(404).send("The URL does not exist in the database.");
+  }
   
   // Check to see if URL belongs to user. If it does then render the ursl_show template with the new data
   for (let key in urlsForUser(userID)) {
