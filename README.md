@@ -28,7 +28,7 @@ TinyApp is a full stack web application built with Node and Express that allows 
 ## File Explanation
 
 express_server.js
-This file is the main server file for the TinyApp project. It sets up the Express server, defines routes, handles user authentication and manages URL shortening functionality. The following is a breakdown of the file:
+- This file is the main server file for the TinyApp project. It sets up the Express server, defines routes, handles user authentication and manages URL shortening functionality. The following is a breakdown of the file:
 
 - Dependencies: Imports required libraries and helper functions.
 - Server Setup: Initializes an Express app, sets up middleware for parsing requests, and configures sessions using cookie-session.
@@ -50,10 +50,10 @@ This file is the main server file for the TinyApp project. It sets up the Expres
 This file is the main file of the TinyApp server, managing user authentication, URL shortening, and routing for the API.
 
 helpers.js
-This file is the contains all helper functions.
+- This file is the contains all helper functions.
 
 helperTest.js
-This file contains test assertions for the helper functions.
+- This file contains test assertions for the helper functions.
 
 routesTest.js
-This file contains test assertions for the routes.
+- This file contains test assertions for the routes.
