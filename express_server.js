@@ -7,6 +7,9 @@ const cookieSession = require('cookie-session');
 // Import the helper functions
 const { findUser, generateRandomString, urlsForUser } = require('./helpers');
 
+// Import the databases
+const { urlDatabase, users } = require('./database');
+
 // Define the app as an instance of express
 const app = express();
 
@@ -31,32 +34,6 @@ app.use(cookieSession({
 
 // Set ejs as the view engine
 app.set("view engine", "ejs");
-
-// URL database
-const urlDatabase = {
-  b2xVn2: {
-    longURL: "http://www.lighthouselabs.ca",
-    userID: "userRandomID"
-  },
-  "9sm5xK": {
-    longURL: "http://www.google.com",
-    userID: "user2RandomID"
-  }
-};
-
-// Create global object to store and access the users in the app
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  }
-};
 
 // Add an endpoint to handle a GET for /login
 app.get("/login", (req, res) => {
