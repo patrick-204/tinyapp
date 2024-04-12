@@ -189,7 +189,7 @@ app.get("/urls", (req, res) => {
   // Request the user ID from the encrypted cookie and define new constant
   const userID = req.session.user_id;
 
-  // If the iser is not logged in then they cannot see any shortened URLs
+  // If the user is not logged in then they cannot see any shortened URLs
   if (!userID) {
     return res.status(403).send("Must be logged in to view ID associated URLs.");
   } else {
@@ -234,34 +234,26 @@ app.get("/urls/:id", (req, res) => {
   // Request the user ID from the encrypted cookie and define new constant
   const userID = req.session.user_id;
 
-  // Send HTML message to user explaining they can't see the individual URL page because they are not logged in
-  if (!userID) {
-    return res.status(403).send("Must be logged in to view the URL.");
-  } 
-
   // Check if the requested URL exists in the database
   if (!urlDatabase[req.params.id]) {
     return res.status(404).send("The URL does not exist in the database.");
   }
-  
-  // Check to see if URL belongs to user. If it does then render the ursl_show template with the new data
-  for (let key in urlsForUser(userID)) {
-    if (key === req.params.id) {
-      const templateVars = { 
-        id: req.params.id, 
-        longURL: urlDatabase[req.params.id].longURL,
-        // Pass in the users object to the urls_show EJS template
-        users,
-        user_id: req.session.user_id
-      };
-    
-      // Render the show page
-      res.render("urls_show", templateVars);
-    } 
+
+  // Check if the requested URL belongs to the logged-in user
+  if (urlDatabase[req.params.id].userID !== userID) {
+    return res.status(403).send("You do not have access to this URL.");
   }
 
-  // Send HTML message to user explaining they can't see the individual URL page if it doesn't belong to them
-  return res.status(403).send("You do not have access to this URL.");
+  const templateVars = { 
+    id: req.params.id, 
+    longURL: urlDatabase[req.params.id].longURL,
+    // Pass in the users object to the urls_show EJS template
+    users,
+    user_id: req.session.user_id
+  };
+
+  // Render the show page
+  res.render("urls_show", templateVars);
 });
 
 // Route handler for short URL requests. Redirects to appropriate long URL
@@ -269,19 +261,16 @@ app.get("/u/:id", (req, res) => {
   // Define the short URL ID as new constant
   const id = req.params.id;
 
-  for (let key in urlDatabase) {
-    // Send HTML message to user explaining the shortended URL does not exist
-    if (id === key) {
-      // Assign the longURL the value of the urlDatabase object value associated with the given ID
-      const longURL = urlDatabase[req.params.id].longURL;
-
-      // Redirect to the long URL using the short URL
-      res.redirect(longURL);
-    } 
+  // Check if the requested shortened URL exists in the database
+  if (!urlDatabase[id]) {
+    return res.status(404).send("The shortened URL does not exist.");
   }
 
-  return res.status(403).send("The shortened URL does not exist.");
+  // Assign the longURL the value of the urlDatabase object value associated with the given ID
+  const longURL = urlDatabase[req.params.id].longURL;
 
+  // Redirect to the long URL using the short URL
+  res.redirect(longURL);
 });
 
 // Add POST route handler to receive the form submission for making a new short URL
@@ -303,6 +292,9 @@ app.post("/urls", (req, res) => {
 
     // Set the longURL of the object for the id
     urlDatabase[id].longURL = req.body.longURL;
+
+    // Assign the userID to the new URL
+    urlDatabase[id].userID = userID;
 
     // Redirect to "/urls/:id" path so the user can see the newly added URL
     res.redirect(`/urls/${id}`);
@@ -334,8 +326,10 @@ app.post("/urls/:id/delete", (req, res) => {
   // Get the ID from the request
   const id = req.params.id;
 
-  // Delete the URL
-  delete urlDatabase[id].longURL;
+  // Delete the URL and short URL
+  delete urlDatabase[id];
+
+  
 
   // Redirect the client back to the url_index page
   res.redirect("/urls");
