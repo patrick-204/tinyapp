@@ -152,14 +152,11 @@ app.post("/register", (req, res) => {
   users[randomUserID].email = req.body.email;
   users[randomUserID].password =  hashedPassword;
 
-  // Redirect the user to the /login page
-  res.redirect("/login");
-
-  // Set a user_ID cookie that contains the new user ID
-  // res.cookie('user_id', randomUserID);
-
   // Set an encrypted cookie inside the session object to the value of the random user ID
   req.session.user_id = randomUserID;
+
+  // Redirect the user to the /urls page
+  res.redirect("/urls");
 
 });
 
