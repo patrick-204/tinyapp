@@ -19,7 +19,7 @@ TinyApp is a full stack web application built with Node and Express that allows 
 ## Getting Started
 
 - Install all dependencies (using the `npm install` command).
-- Run the development web server using the `node express_server.js` command.
+- Run the development web server from the command line using the `npm start` command.
 - Register using the /register page
 - Login using the /login page
 - Select My URLs in the Naviagtion to access the user's URLs
@@ -50,7 +50,7 @@ express_server.js
 This file is the main file of the TinyApp server, managing user authentication, URL shortening, and routing for the API.
 
 helpers.js
-- This file is the contains all helper functions.
+- This file contains all helper functions.
 
 helperTest.js
 - This file contains test assertions for the helper functions.

@@ -67,7 +67,7 @@ app.get("/login", (req, res) => {
   if (userID) {
     res.redirect("/urls");
   } else {
-    res.render("login"); // Render the login page
+    res.render("login", { user_id: userID }); // Render the login page
   }
   
 });
@@ -113,7 +113,7 @@ app.get("/register", (req, res) => {
   if (userID) {
     res.redirect("/urls");
   } else {
-    res.render("register"); // Render the register page if not logged in
+    res.render("register", { user_id: userID }); // Render the register page if not logged in
   }
 });
 
