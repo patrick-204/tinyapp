@@ -26,32 +26,36 @@ describe("Login and Access Control Test", () => {
 // A user should be redirected to /login if they are not logged in
 describe('GET /', function() {
   it('should redirect to /login with status code 302', function() {
+    // Create an agent to make requests
     const agent = chai.request.agent("http://localhost:8080");
 
     return agent
       .get('/')
+      .redirects(0) // Disable automatic redirection
       .then(function(res) {
         // Expect a redirect with status code 302
         expect(res).to.redirect;
-        expect(res).to.redirectTo('http://localhost:8080/login');
+        expect(res).to.have.header('location', '/login'); // Check if "Location" header is set to "/login"
         expect(res).to.have.status(302);
-      });
+      })
   });
 });
 
 // A user should be redirected to /login if GET request is made to urls/new
 describe('GET /urls/new', function() {
   it('should redirect to /login with status code 302', function() {
+    // Create an agent to make requests
     const agent = chai.request.agent("http://localhost:8080");
 
     return agent
-      .get('/')
+      .get('/urls/new')
+      .redirects(0) // Disable automatic redirection
       .then(function(res) {
         // Expect a redirect with status code 302
         expect(res).to.redirect;
-        expect(res).to.redirectTo('http://localhost:8080/login');
+        expect(res).to.have.header('location', '/login'); // Check if "Location" header is set to "/login"
         expect(res).to.have.status(302);
-      });
+      })
   });
 });
 
