@@ -4,8 +4,6 @@ const findUser = function(email, userDatabase) {
     // If the email matches a user email in the users object then return the user object
     if (userDatabase[user].email === email) return userDatabase[user];
   }
-
-  // If the email does not match then return undefined
   return null;
 };
 

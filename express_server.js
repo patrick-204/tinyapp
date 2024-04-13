@@ -43,7 +43,7 @@ app.get("/login", (req, res) => {
   if (userID) {
     res.redirect("/urls");
   } 
-  
+
   res.render("login", { user_id: userID });
 });
 
@@ -110,7 +110,7 @@ app.post("/register", (req, res) => {
   const hashedPassword = bcrypt.hashSync(password, 10);
 
   // If an account for the same user already exists then send back response with 400 status code
-  if (findUser(email, urlDatabase)) {
+  if (findUser(email, users)) {
     return res.status(400).send("User Login Taken: Try and different ID.");
   }
 
