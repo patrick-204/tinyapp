@@ -221,7 +221,12 @@ app.get("/u/:id", (req, res) => {
   }
 
   // Assign the longURL the value of the urlDatabase object value associated with the given ID
-  const longURL = urlDatabase[req.params.id].longURL;
+  let longURL = urlDatabase[req.params.id].longURL;
+
+  // Normalize the URL if does not include http
+  if (!longURL.includes('http://')) {
+    longURL = 'http://' + longURL
+  }
 
   // Redirect to the long URL using the short URL
   res.redirect(longURL);
